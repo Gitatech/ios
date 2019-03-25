@@ -1,6 +1,7 @@
 #import "SummArray.h"
 
 @implementation SummArray
+
 // Complete the summArray function below.
 - (NSNumber *)summArray:(NSArray *)array {
     double summ = 0;
