@@ -3,16 +3,13 @@
 @implementation SummArray
 // Complete the summArray function below.
 - (NSNumber *)summArray:(NSArray *)array {
-    NSInteger summ = 0;
-    NSLog(@"Array: %@", array);
+    double summ = 0;
     
     // get the summ of array
     for (NSNumber *item in array) {
-        summ += [item integerValue];
+        summ += [item doubleValue];
     }
-    
-    NSLog(@"Summ = %ld", (long)summ);
-    return [NSNumber numberWithInteger:summ];
+    return [NSNumber numberWithDouble:summ];
 }
 
 @end
