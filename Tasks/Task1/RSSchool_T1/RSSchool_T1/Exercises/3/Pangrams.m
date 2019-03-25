@@ -7,9 +7,6 @@
     NSString *alphabet = @"abcdefghijklmnopqrstuvwxyz"; // set up the alphabet string
     Boolean flag = YES;
     
-//    NSString *rr = @"Hello world 123456789!";
-//    NSLog(@"!!! %@", [rr substringWithRange:NSMakeRange(6, 13)]);
-//
     for (int item=0; item<[alphabet length]; item++) {
         // get each symbol from the alphabet string
         // take a substring of length 1 symbol from the position 'item'
@@ -20,8 +17,8 @@
         }
     }
     
-//    NSCharacterSet *set = [NSCharacterSet characterSetWithCharactersInString:@"abcdefghijklmnopqrstuvwxyz"];
-//    if ([[string lowercaseString] rangeOfCharacterFromSet:set].location == NSNotFound) {
+//    NSCharacterSet *setLetters = [NSCharacterSet characterSetWithCharactersInString:@"abcdefghijklmnopqrstuvwxyz"];
+//    if ([[string lowercaseString] rangeOfCharacterFromSet:setLetters].location == NSNotFound) {
 //        flag = NO;
 //    }
     return flag;
