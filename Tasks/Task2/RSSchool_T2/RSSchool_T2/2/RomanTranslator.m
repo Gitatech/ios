@@ -21,7 +21,7 @@
 }
 
 - (NSString *)arabicFromRoman:(NSString *)romanString {
-    NSString *romanNumber = [[romanString uppercaseString] copy];
+    NSString *romanNumber = [romanString uppercaseString];
     NSInteger romanLenght = romanNumber.length;
     //    NSInteger currentValue = 0;
     NSInteger lastValue = 0;
@@ -40,7 +40,7 @@
     }
     
     NSString *resultArabic = [NSString stringWithFormat:@"%@", [NSNumber numberWithInteger:resultValue]];
-    return [resultArabic autorelease];
+    return resultArabic;
 }
 
 - (NSString *)romanFromArabic:(NSString *)arabicString {
@@ -50,8 +50,8 @@
 
 - (void)dealloc
 {
-    [self.romanDictionary release];
-    [self.arabicDictionary release];
+    [_romanDictionary release];
+    [_arabicDictionary release];
     [super dealloc];
 }
 
