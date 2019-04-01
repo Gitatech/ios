@@ -3,23 +3,31 @@
 @implementation KidnapperNote
 // your code here
 - (BOOL)checkMagazine:(NSString *)magaine note:(NSString *)note {
-    
+    BOOL result = NO;
     // create arrays with words from string
-    NSMutableArray *magazineWords = [[magaine.lowercaseString copy] componentsSeparatedByString:@" "];
-    NSMutableArray *noteWords = [[note.lowercaseString copy] componentsSeparatedByString:@" "];
+    NSArray *magazineWords = [magaine.lowercaseString componentsSeparatedByString:@" "];
+    NSArray *noteWords = [note.lowercaseString componentsSeparatedByString:@" "];
     
     // create counted sets for comparing items
-    NSCountedSet *MagazineSet = [NSCountedSet.new initWithArray:magazineWords];
+    NSCountedSet *magazineSet = [NSCountedSet.new initWithArray:magazineWords];
     NSCountedSet *noteSet = [NSCountedSet.new initWithArray:noteWords];
     
     // remove all objects from note if they are present
-    [noteSet minusSet:MagazineSet];
+    [noteSet minusSet:magazineSet];
     NSInteger counter = noteSet.count;
 
     if (counter==0) {
-        return YES;
+        result = YES;
     }
-    return NO;
+    
+    [magazineSet release];
+    [noteSet release];
+    return result;
+}
+
+- (void)dealloc
+{
+    [super dealloc];
 }
 
 @end
