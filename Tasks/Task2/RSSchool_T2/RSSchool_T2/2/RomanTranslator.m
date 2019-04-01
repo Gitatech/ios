@@ -44,12 +44,52 @@
 }
 
 - (NSString *)romanFromArabic:(NSString *)arabicString {
-    NSString *resultRoman = nil;
-    return [resultRoman autorelease];
+    // Sort the keys in dictionary in descending order
+    NSArray *dictionaryKeys = [self.romanDictionary allKeys];
+    NSArray *sortedKeys = [dictionaryKeys sortedArrayUsingComparator:^NSComparisonResult(id  _Nonnull obj1, id  _Nonnull obj2) {
+        int firstItem = (int)[self.romanDictionary objectForKey:obj1];
+        int secondItem = (int)[self.romanDictionary objectForKey:obj2];
+        return firstItem < secondItem;
+//        return [[_romanDictionary objectForKey:obj1] compare:[_romanDictionary objectForKey:obj2]];
+    }];
+    NSLog(@"get all keys %@", dictionaryKeys);
+    NSLog(@"get sorted %@", sortedKeys);
+    
+    int integerFromArarbic = [arabicString intValue]; // get intValue from the Arabic string
+    NSMutableString *resultRomanString = [NSMutableString new];
+    
+    while (integerFromArarbic > 0) {
+        for (NSNumber *item in sortedKeys) {
+            // choose the correct item according to the conditions
+            NSNumber *part = [NSNumber numberWithInt:1];
+            if ([item isEqualToNumber:@(50)] || [item isEqualToNumber:@(100)]) {
+                part = [NSNumber numberWithInt:10];
+            } else if ([item isEqualToNumber:@(500)] || [item isEqualToNumber:@(1000)]) {
+                part = [NSNumber numberWithInt:100];
+            }
+            
+            // extract roman symbols from the dictionary and collect them into resultRomanString
+            if (integerFromArarbic - item.intValue >= 0) {
+                // TODO:
+                [resultRomanString appendString:_romanDictionary[item]];
+                integerFromArarbic = integerFromArarbic - item.intValue;
+                break;
+            } else
+                if (integerFromArarbic - item.intValue + part.intValue >= 0) {
+                    // TODO:
+                    [resultRomanString appendString:self.romanDictionary[part]];
+                    [resultRomanString appendString:self.romanDictionary[item]];
+                    integerFromArarbic = integerFromArarbic - item.intValue + part.intValue;
+                break;
+            }
+        }
+    }
+    return [resultRomanString autorelease];
 }
 
 - (void)dealloc
 {
+    // release all the properties
     [_romanDictionary release];
     [_arabicDictionary release];
     [super dealloc];
