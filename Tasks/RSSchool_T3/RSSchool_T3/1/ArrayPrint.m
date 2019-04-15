@@ -30,7 +30,7 @@
                         NSLog(@"NSString item = %@", item);
                         [resultArray addObject:[NSString stringWithFormat:@"\"%@\"", item]];
                     } else
-                        [resultArray addObject: [NSString stringWithFormat:@"%@", @"unsupported"]];
+                        [resultArray addObject:[NSString stringWithFormat:@"%@", @"unsupported"]];
     }
 
     NSString *resultString = [NSString stringWithFormat:@"%@%@%@", @"[", [resultArray componentsJoinedByString:@","], @"]"];
