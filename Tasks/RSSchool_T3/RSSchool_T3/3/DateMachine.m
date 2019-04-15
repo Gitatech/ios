@@ -17,7 +17,7 @@
 double const itemHeight = 50.0;
 
 - (void)viewDidLoad {
-  [super viewDidLoad];
+    [super viewDidLoad];
     
     [self setColors];
     [self generateUIView];
@@ -51,7 +51,6 @@ double const itemHeight = 50.0;
     [self.dateLabel setText:[self getCurrentDate]];
     self.dateLabel.lineBreakMode = NSLineBreakByWordWrapping;
     [self.view addSubview:self.dateLabel];
-//    [self.dateLabel release];
     
     // manage autolayout constraints for UILabel
     self.dateLabel.translatesAutoresizingMaskIntoConstraints = NO;
@@ -75,7 +74,6 @@ double const itemHeight = 50.0;
     self.textField1.alpha = 0.9f;
     self.textField1.delegate = self;
     [self.view addSubview:self.textField1];
-//    [self.textField1 release];
     
     // manage autolayout constraints for UITextField1
     self.textField1.translatesAutoresizingMaskIntoConstraints = NO;
@@ -97,7 +95,6 @@ double const itemHeight = 50.0;
     self.textField2.alpha = 0.9f;
     self.textField2.delegate = self;
     [self.view addSubview:self.textField2];
-//    [self.textField2 release];
     
     // manage autolayout constraints for UITextField2
     self.textField2.translatesAutoresizingMaskIntoConstraints = NO;
@@ -119,7 +116,6 @@ double const itemHeight = 50.0;
     self.textField3.alpha = 0.9f;
     self.textField3.delegate = self;
     [self.view addSubview:self.textField3];
-//    [self.textField3 release];
     
     // manage autolayout constraints for UITextField2
     self.textField3.translatesAutoresizingMaskIntoConstraints = NO;
@@ -155,9 +151,8 @@ double const itemHeight = 50.0;
     [self.addButton setTitle:@"Add" forState:UIControlStateNormal];
     self.addButton.backgroundColor = self.customOrange;
     self.dateLabel.font = [UIFont fontWithName:@"Arial" size:25];
-    [self.addButton addTarget:self action:@selector(addButtonClick:) forControlEvents:UIControlEventTouchUpInside];
+    [self.addButton addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.addButton];
-//    [self.addButton release];
     
     // manage autolayout constraints for UIButton1
     self.addButton.translatesAutoresizingMaskIntoConstraints = NO;
@@ -171,9 +166,12 @@ double const itemHeight = 50.0;
     [self.subButton setTitle:@"Sub" forState:UIControlStateNormal];
     self.subButton.backgroundColor = self.customOrange;
     self.dateLabel.font = [UIFont fontWithName:@"Arial" size:25];
-    [self.subButton addTarget:self action:@selector(subButtonClick:) forControlEvents:UIControlEventTouchUpInside];
+    [self.subButton addTarget:self action:@selector(buttonClick:) forControlEvents:UIControlEventTouchUpInside];
     [self.view addSubview:self.subButton];
-//    [self.subButton release];
+    
+    // add tags
+    self.addButton.tag = 111;
+    self.subButton.tag = 222;
     
     // manage autolayout constraints for UIButton2
     self.subButton.translatesAutoresizingMaskIntoConstraints = NO;
@@ -192,16 +190,27 @@ double const itemHeight = 50.0;
 }
 
 #pragma mark - Button click selectors
--(void)addButtonClick:(id)sender {
+-(void)buttonClick:(id)sender {
     NSArray *dates = @[@"year", @"month", @"week", @"day", @"hour", @"minute"];
     if (![dates containsObject: self.textField3.text.lowercaseString]) {
         self.dateLabel.text = @"Invalid value";
         self.textField2.text = @"";
         self.textField3.text = @"";
     }
-
+    
     // for operations of addition and subtraction of the dates we could use NSCalendar components
     NSInteger stepValue = [self.textField2.text integerValue];
+    switch (((UIButton *)sender).tag){
+        case 111:
+            NSLog(@"addButton");
+            break;
+        case 222:
+            NSLog(@"subButton");
+            stepValue = (-1)*stepValue;
+            break;
+        default:
+            break;
+    }
     NSLog(@"%li", (long)stepValue);
     
     NSCalendarUnit unit;
@@ -239,70 +248,10 @@ double const itemHeight = 50.0;
     NSDateFormatter *dateFormatter = [[NSDateFormatter new] autorelease];
     dateFormatter.dateFormat = @"dd/MM/yyyy HH:mm";
     
-    // TODO: - find mistake
     NSCalendar *grgCalendar = [NSCalendar calendarWithIdentifier:NSCalendarIdentifierGregorian];
-//    NSDate *currentDate = [dateFormatter dateFromString: [self getCurrentDate]];
     NSDate *currentDate = [dateFormatter dateFromString: self.dateLabel.text.lowercaseString];
     NSDate *setupDate = [grgCalendar dateByAddingUnit:unit value:(int)stepValue toDate:currentDate options: 0];
     self.dateLabel.text = [dateFormatter stringFromDate: setupDate];
-    
-    NSLog(@"Button  was clicked");
-}
-
--(void)subButtonClick:(id)sender {
-    NSArray *dates = @[@"year", @"month", @"week", @"day", @"hour", @"minute"];
-    if (![dates containsObject: self.textField3.text.lowercaseString]) {
-        self.dateLabel.text = @"Invalid value";
-        self.textField2.text = @"";
-        self.textField3.text = @"";
-    }
-    
-    // for operations of addition and subtraction of the dates we could use NSCalendar
-    NSInteger stepValue = [self.textField2.text integerValue];
-    NSLog(@"%li", (long)stepValue);
-    
-    NSCalendarUnit unit;
-    int item = (int)[dates indexOfObject:self.textField3.text.lowercaseString];
-    switch (item) {
-        case 0:
-            // year
-            unit = NSCalendarUnitYear;
-            break;
-        case 1:
-            // month
-            unit = NSCalendarUnitMonth;
-            break;
-        case 2: {
-            // week
-            unit = NSCalendarUnitWeekOfYear;
-            break;
-        }
-        case 3:
-            // day
-            unit = NSCalendarUnitDay;
-            break;
-        case 4:
-            // hour
-            unit = NSCalendarUnitHour;
-            break;
-        case 5:
-            // minute
-            unit = NSCalendarUnitMinute;
-            break;
-        default:
-            return;
-    }
-    
-    NSDateFormatter *dateFormatter = [[NSDateFormatter new] autorelease];
-    dateFormatter.dateFormat = @"dd/MM/yyyy HH:mm";
-    
-    // TODO: - find mistake
-    NSCalendar *grgCalendar = [NSCalendar calendarWithIdentifier:NSCalendarIdentifierGregorian];
-    //    NSDate *currentDate = [dateFormatter dateFromString: [self getCurrentDate]];
-    NSDate *currentDate = [dateFormatter dateFromString: self.dateLabel.text.lowercaseString];
-    NSDate *setupDate = [grgCalendar dateByAddingUnit:unit value:(int)stepValue toDate:currentDate options: 0];
-    self.dateLabel.text = [dateFormatter stringFromDate: setupDate];
-    
     NSLog(@"Button  was clicked");
 }
 
@@ -313,12 +262,9 @@ double const itemHeight = 50.0;
         dateFormatter.dateFormat = @"dd/MM/yyyy HH:mm";
         NSString *inputDate = [textField.text stringByReplacingCharactersInRange:range withString:string];
         // if we could get real date from input string - we'll show it
-//        if (![dateFormatter dateFromString: inputDate]) {
         if ([dateFormatter dateFromString: inputDate]) {
             self.dateLabel.text = inputDate;
-//            return NO;
         }
-//        self.dateLabel.text = inputDate;
         return YES;
     }
     
@@ -329,7 +275,7 @@ double const itemHeight = 50.0;
         }
         return YES;
     }
-
+    
     if (textField == self.textField3) {
         NSCharacterSet *charSet = [NSCharacterSet letterCharacterSet];
         if ([string rangeOfCharacterFromSet: charSet.invertedSet].location != NSNotFound) {
@@ -342,14 +288,6 @@ double const itemHeight = 50.0;
 
 - (void)dealloc
 {
-//    [self.dateLabel release];
-//    [self.textField1 release];
-//    [self.textField2 release];
-//    [self.textField3 release];
-//    [self.addButton release];
-//    [self.subButton release];
-//    [self.customBlue release];
-//    [self.customOrange release];
     [super dealloc];
 }
 
