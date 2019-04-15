@@ -249,9 +249,17 @@ double const itemHeight = 50.0;
     dateFormatter.dateFormat = @"dd/MM/yyyy HH:mm";
     
     NSCalendar *grgCalendar = [NSCalendar calendarWithIdentifier:NSCalendarIdentifierGregorian];
-    NSDate *currentDate = [dateFormatter dateFromString: self.dateLabel.text.lowercaseString];
-    NSDate *setupDate = [grgCalendar dateByAddingUnit:unit value:(int)stepValue toDate:currentDate options: 0];
-    self.dateLabel.text = [dateFormatter stringFromDate: setupDate];
+    if ([dateFormatter dateFromString: self.dateLabel.text.lowercaseString]) {
+        NSDate *currentDate = [dateFormatter dateFromString: self.dateLabel.text.lowercaseString];
+        NSDate *setupDate = [grgCalendar dateByAddingUnit:unit value:(int)stepValue toDate:currentDate options: 0];
+        self.dateLabel.text = [dateFormatter stringFromDate: setupDate];
+    } else {
+        NSLog(@"incorrect input");
+        self.textField1.text = @"";
+        self.textField2.text = @"";
+        self.textField3.text = @"";
+        self.dateLabel.text = [self getCurrentDate];
+    }
     NSLog(@"Button  was clicked");
 }
 
