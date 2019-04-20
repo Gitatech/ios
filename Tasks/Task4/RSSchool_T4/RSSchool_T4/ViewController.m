@@ -30,11 +30,14 @@
     [self setupView];
 }
 
+#pragma mark - setup UI
 -(void)setupView {
     self.view.backgroundColor = [UIColor colorWithRed:0.0 green:0.38 blue:0.54 alpha:0.9];
-    NSLog(@"ViewController was setuped");
     [self setupTextFieldAppearance];
-    [self defineCountryCode:@"380748234952379428379238749"]; // just check algorithm
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(textFieldDidChange:)
+                                                 name:UITextFieldTextDidChangeNotification
+                                               object:self.phoneNumberTextField];
 }
 
 -(void)setupTextFieldAppearance {
@@ -67,12 +70,12 @@
 
 #pragma mark - define the code of the country and setup country flag
 -(void)defineCountryCode:(NSString *)phoneNumber {
-//    NSString *flagName = [[NSString new] autorelease];
+    //    NSString *flagName = [[NSString new] autorelease];
     NSMutableString *prefix = [[NSMutableString new] autorelease];
     if (phoneNumber.length >= 3) {
         prefix = [NSMutableString stringWithFormat:@"%@", [phoneNumber substringWithRange:NSMakeRange(0, 3)]];
     }
-    NSLog(@"prefix -> %@", prefix);
+//    NSLog(@"prefix -> %@", prefix);
     
     switch ([prefix intValue]) {
         case 998:
@@ -119,7 +122,7 @@
                             self.flagImage.image = [UIImage imageNamed:@"flag_RU"];
                             break;
                         default:
-                            NSLog(@"Country code not found. Check input data!");
+                            self.flagImage.image = nil;
                             break;
                     }
                     break;
@@ -128,8 +131,48 @@
     }
 }
 
+#pragma mark - manage UItextFiled behavior
+-(void)textFieldDidChange:(UITextField *)textField {
+    if ([self.phoneNumberTextField.text hasPrefix:@"+"]) {
+        NSString *workNumber = [[NSString new] autorelease];
+        workNumber = [self.phoneNumberTextField.text substringFromIndex:1];
+        if (workNumber.length < 4) {
+            [self defineCountryCode:workNumber];
+        }
+    } else {
+        if (self.phoneNumberTextField.text.length < 4) {
+            [self defineCountryCode:self.phoneNumberTextField.text];
+        }
+    }
+}
+
+-(BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
+    if (textField == self.phoneNumberTextField) {
+        NSCharacterSet *charSet = [NSCharacterSet decimalDigitCharacterSet];
+        NSCharacterSet *specialSet = [NSCharacterSet characterSetWithCharactersInString:@"+"]; // the set for special symbols used in phonenumber like "+"
+        
+        if (textField.text.length < 16) {
+            if ([string rangeOfCharacterFromSet:charSet.invertedSet].location != NSNotFound &&
+                [string rangeOfCharacterFromSet:specialSet].location) {
+                // TODO: плюс можно только на 1е место
+                NSLog(@"wrong symbols");
+                return NO;
+            }
+            return YES;
+        } else {
+            NSLog(@"limit!");
+            return NO;
+        }
+    }
+    return YES;
+}
+
 - (void)dealloc
 {
+    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+    [center removeObserver:self
+                      name:UITextFieldTextDidChangeNotification
+                    object:self.phoneNumberTextField];
     [self phoneNumberTextField];
     [self flagImage];
     [super dealloc];
