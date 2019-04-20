@@ -13,7 +13,9 @@
 // ​UIKeyboardType = Phone +
 //При вводе номера телефона автоматически подставляется “+” перед первым символом если пользователь сам не ввел “+” при наборе номера телефона. +
 //Если код страны определился то в левой части UITextField должен отобразится флаг страны. +
-//
+// 8 - (xx) xxx-xxx
+// 9 - (xx) xxx-xx-xx
+//10 - (xxx) xxx xx xx
 
 #import "ViewController.h"
 
@@ -21,6 +23,8 @@
 
 @property(weak, nonatomic) UITextField *phoneNumberTextField;
 @property(weak, nonatomic) UIImageView *flagImage;
+@property(copy, nonatomic) NSString *numberFormat; // @"long" for 10 character number, @"short" for 8/9 character
+// this is some key, cause I didn't imagine how to use Enum in Objective-C
 
 @end
 
@@ -74,6 +78,7 @@
     NSMutableString *prefix = [[NSMutableString new] autorelease];
     if (phoneNumber.length >= 3) {
         prefix = [NSMutableString stringWithFormat:@"%@", [phoneNumber substringWithRange:NSMakeRange(0, 3)]];
+//        prefix = [[phoneNumber substringWithRange:NSMakeRange(0, 3)] mutableCopy];
     }
     
     switch ([prefix intValue]) {
@@ -131,6 +136,35 @@
 }
 
 #pragma mark - manage UItextFiled behavior
+-(BOOL)textFieldShouldReturn:(UITextField *)textField {
+    if ([textField isFirstResponder]) {
+        [textField resignFirstResponder];
+        NSLog(@"event log -> %s", "textFieldShouldReturn");
+        return YES;
+    }
+    return NO;
+}
+
+//-(void)textFieldDidEndEditing:(UITextField *)textField {
+//    if ([textField isFirstResponder]) {
+//        [textField resignFirstResponder];
+//         NSLog(@"event log -> %s", "textFieldDidEndEditing");
+//    }
+//}
+
+// hide keyboard and return value on touching outside
+-(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+    UITouch *touch = [touches anyObject];
+    if (touch.phase == UITouchPhaseBegan) {
+        if ([self.phoneNumberTextField isFirstResponder]) {
+            NSLog(@"event log -> %s", "touchesBegan");
+            [self.phoneNumberTextField resignFirstResponder];
+        }
+        [self.view endEditing:YES];
+    }
+}
+
+
 -(void)textFieldDidChange:(UITextField *)textField {
     if ([self.phoneNumberTextField.text hasPrefix:@"+"]) {
         NSString *workNumber = [[NSString new] autorelease];
@@ -155,10 +189,11 @@
         }
         
         // manage user's input data
-        // TODO: нужно считать количество цифр без символов, пробелов и скобок - должно быть 375298707234 <= 12 всегда
-        // 1. отсекаем лишнее содержание
-        // 2. считаем количество цифр и проверяем условие
-        if (textField.text.length < 16) {
+        // TODO: нужно считать количество цифр без символов, пробелов и скобок - должно быть 375298707234 <= 12 всегда +
+        // 1. отсекаем лишнее содержание +
+        // 2. считаем количество цифр и проверяем условие +
+        NSString *clearNumber = [self getDecimalStringFromPhoneNumber:textField.text];
+        if (clearNumber.length < 12) {
             if ([string rangeOfCharacterFromSet:charSet.invertedSet].location != NSNotFound &&
                 [string rangeOfCharacterFromSet:specialSet].location) {
                 NSLog(@"wrong symbols");
@@ -175,8 +210,15 @@
             // 1. remove country code and get number lenght
             // 2. choose the option: 10, 9, 8
             // 3. add "(", ")", " ", "-" on correct positions according to the mask
-            // add phone number formating - end
+            // +X (XXX) - only this part
+            // russian - +7 (123) 456 78 90
+            NSMutableString *formattedNumber = [[clearNumber mutableCopy] autorelease];
+            [formattedNumber insertString:@" (" atIndex:1]; // вставляем на позицию 1
+            [formattedNumber appendString:@") "]; // добавляем к строке в конце
+            NSLog(@"formatted number: %@", formattedNumber);
+            textField.text = formattedNumber;
             
+            // add phone number formating - end
             return YES;
         } else {
             NSLog(@"limit!");
@@ -184,6 +226,15 @@
         }
     }
     return YES;
+}
+
+
+// TODO: - works incorrect!!!
+-(NSString *)getDecimalStringFromPhoneNumber:(NSString *)input {
+    NSCharacterSet *set = [NSCharacterSet decimalDigitCharacterSet];
+    NSString *string = [NSString stringWithFormat:@"%@", [input stringByTrimmingCharactersInSet:set.invertedSet]];
+    NSLog(@"str -> %@", string);
+    return string;
 }
 
 - (void)dealloc
@@ -194,6 +245,7 @@
                     object:self.phoneNumberTextField];
     [self phoneNumberTextField];
     [self flagImage];
+    [self numberFormat];
     [super dealloc];
 }
 
