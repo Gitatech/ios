@@ -6,13 +6,14 @@
 //  Copyright © 2019 iOSLab. All rights reserved.
 //
 
-// ​UIKeyboardType = Phone
 //1. Код страны не входит в длину номера телефона
 //2. Максимальная длина номера телефона 12 знаков (без форматирования)
-//При вводе номера телефона автоматически подставляется “+” перед первым символом если пользователь сам не ввел “+” при наборе номера телефона.
-//Если код страны определился то в левой части UITextField должен отобразится флаг страны.
-
 //используем frame/bounds для работы с размерами элементов
+
+// ​UIKeyboardType = Phone +
+//При вводе номера телефона автоматически подставляется “+” перед первым символом если пользователь сам не ввел “+” при наборе номера телефона. +
+//Если код страны определился то в левой части UITextField должен отобразится флаг страны. +
+//
 
 #import "ViewController.h"
 
@@ -70,12 +71,10 @@
 
 #pragma mark - define the code of the country and setup country flag
 -(void)defineCountryCode:(NSString *)phoneNumber {
-    //    NSString *flagName = [[NSString new] autorelease];
     NSMutableString *prefix = [[NSMutableString new] autorelease];
     if (phoneNumber.length >= 3) {
         prefix = [NSMutableString stringWithFormat:@"%@", [phoneNumber substringWithRange:NSMakeRange(0, 3)]];
     }
-//    NSLog(@"prefix -> %@", prefix);
     
     switch ([prefix intValue]) {
         case 998:
@@ -136,28 +135,48 @@
     if ([self.phoneNumberTextField.text hasPrefix:@"+"]) {
         NSString *workNumber = [[NSString new] autorelease];
         workNumber = [self.phoneNumberTextField.text substringFromIndex:1];
-        if (workNumber.length < 4) {
-            [self defineCountryCode:workNumber];
-        }
+        [self defineCountryCode:workNumber];
     } else {
-        if (self.phoneNumberTextField.text.length < 4) {
-            [self defineCountryCode:self.phoneNumberTextField.text];
-        }
+        [self defineCountryCode:self.phoneNumberTextField.text];
     }
 }
 
 -(BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
+    // string - The replacement string for the specified range.
+    // During typing, this parameter normally contains only the single new character that was typed, but it may contain more characters if the user is pasting text.
+    // When the user deletes one or more characters, the replacement string is empty.
     if (textField == self.phoneNumberTextField) {
         NSCharacterSet *charSet = [NSCharacterSet decimalDigitCharacterSet];
-        NSCharacterSet *specialSet = [NSCharacterSet characterSetWithCharactersInString:@"+"]; // the set for special symbols used in phonenumber like "+"
+        NSCharacterSet *specialSet = [NSCharacterSet characterSetWithCharactersInString:@"+"]; // the set for special symbols used in phonenumber like "+", "(", ")"
         
+        // add "+" into the first position of the text field if user ignore it
+        if (range.location == 0 && ![string hasPrefix:@"+"]) {
+            textField.text = [NSString stringWithFormat:@"+"];
+        }
+        
+        // manage user's input data
+        // TODO: нужно считать количество цифр без символов, пробелов и скобок - должно быть 375298707234 <= 12 всегда
+        // 1. отсекаем лишнее содержание
+        // 2. считаем количество цифр и проверяем условие
         if (textField.text.length < 16) {
             if ([string rangeOfCharacterFromSet:charSet.invertedSet].location != NSNotFound &&
                 [string rangeOfCharacterFromSet:specialSet].location) {
-                // TODO: плюс можно только на 1е место
                 NSLog(@"wrong symbols");
                 return NO;
-            }
+            } else
+                // check - if user will try to enter "+" in the middle of a phone number - block this
+                if ([string rangeOfCharacterFromSet:charSet.invertedSet].location != NSNotFound && range.location != 0) {
+                    NSLog(@"No symbols, only decimal");
+                    return NO;
+                }
+            
+            // add phone number formating - begin
+            // TODO: - добавляем скобки
+            // 1. remove country code and get number lenght
+            // 2. choose the option: 10, 9, 8
+            // 3. add "(", ")", " ", "-" on correct positions according to the mask
+            // add phone number formating - end
+            
             return YES;
         } else {
             NSLog(@"limit!");
