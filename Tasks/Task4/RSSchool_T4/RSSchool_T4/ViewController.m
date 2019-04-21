@@ -16,6 +16,7 @@
 
 @property(weak, nonatomic) UITextField *phoneNumberTextField;
 @property(weak, nonatomic) UIImageView *flagImage;
+@property(weak, nonatomic) CALayer *bottomLine;
 @property(copy, nonatomic) NSString *numberFormat;
 @property(readwrite, nonatomic) NSInteger numberLength;
 
@@ -29,29 +30,6 @@
     
     // set default settings
     [self setCountrySettings:@(0) imageName:@""];
-}
-
-#pragma mark - set country for correct formatting
--(void)setCountrySettings:(NSNumber *)formatType imageName:(NSString *)name {
-    if ([name.lowercaseString isEqualToString:@""]) {
-        self.flagImage.image = nil;
-    } else {
-        self.flagImage.image = [UIImage imageNamed:name];
-    }
-    
-    switch ([formatType intValue]) {
-        case 1:
-            self.numberLength = 11;
-            self.numberFormat = @"ru/kz";
-            break;
-        case 2:
-            self.numberLength = 11;
-            self.numberFormat = @"md/am";
-            break;
-        default:
-            self.numberLength = 12;
-            break;
-    }
 }
 
 #pragma mark - setup UI
@@ -90,6 +68,19 @@
     self.flagImage.contentMode = UIViewContentModeScaleToFill;
     [imageContainer addSubview:self.flagImage];
     self.phoneNumberTextField.leftView = imageContainer;
+    [self drawTheLine];
+}
+
+-(void)drawTheLine {
+    self.bottomLine  = [CALayer layer];
+    self.bottomLine.borderWidth = 1.f;
+    self.bottomLine.borderColor = UIColor.blackColor.CGColor;
+    self.bottomLine.frame = CGRectMake(self.phoneNumberTextField.bounds.origin.x + self.phoneNumberTextField.frame.size.width/4,
+                                  self.phoneNumberTextField.bounds.origin.y + self.phoneNumberTextField.frame.size.height/4*3,
+                                  self.phoneNumberTextField.frame.size.width/4*3-30,
+                                  1.f);
+    [self.phoneNumberTextField.layer addSublayer:self.bottomLine];
+    [self.bottomLine setHidden:YES];
 }
 
 #pragma mark - define the code of the country and setup country flag
@@ -98,7 +89,7 @@
     NSString *prefix = [NSString stringWithFormat:@"%@", decimalNumber];
     
     if (decimalNumber.length >= 3) {
-        prefix = [phoneNumber substringWithRange:NSMakeRange(0, 3)];
+        prefix = [decimalNumber substringWithRange:NSMakeRange(0, 3)];
     }
     
     switch ([prefix intValue]) {
@@ -131,7 +122,7 @@
             break;
         default:
             if (decimalNumber.length >= 2) {
-                prefix = [phoneNumber substringWithRange:NSMakeRange(0, 2)];
+                prefix = [decimalNumber substringWithRange:NSMakeRange(0, 2)];
             }
             switch ([prefix intValue]) {
                 case 77:
@@ -139,7 +130,7 @@
                     break;
                 default:
                     if (decimalNumber.length >= 1) {
-                        prefix = [phoneNumber substringWithRange:NSMakeRange(0, 1)];
+                        prefix = [decimalNumber substringWithRange:NSMakeRange(0, 1)];
                     }
                     switch ([prefix intValue]) {
                         case 7:
@@ -151,6 +142,30 @@
                     }
                     break;
             }
+            break;
+    }
+}
+
+#pragma mark - set country for correct formatting
+-(void)setCountrySettings:(NSNumber *)formatType imageName:(NSString *)name {
+    if ([name.lowercaseString isEqualToString:@""]) {
+        self.flagImage.image = nil;
+    } else {
+        self.flagImage.image = [UIImage imageNamed:name];
+    }
+    
+    switch ([formatType intValue]) {
+        case 1:
+            self.numberLength = 11;
+            self.numberFormat = @"ru/kz";
+            break;
+        case 2:
+            self.numberLength = 11;
+            self.numberFormat = @"md/am";
+            break;
+        default:
+            self.numberFormat = @"";
+            self.numberLength = 12;
             break;
     }
 }
@@ -182,6 +197,10 @@
     } else {
         [self defineCountryCode:self.phoneNumberTextField.text];
     }
+    
+    if (self.phoneNumberTextField.text.length > 0) {
+        [self.bottomLine setHidden:NO];
+    } else [self.bottomLine setHidden:YES];
 }
 
 -(BOOL)textField:(UITextField *)textField shouldChangeCharactersInRange:(NSRange)range replacementString:(NSString *)string {
