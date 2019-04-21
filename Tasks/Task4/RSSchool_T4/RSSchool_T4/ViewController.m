@@ -23,16 +23,62 @@
 
 @property(weak, nonatomic) UITextField *phoneNumberTextField;
 @property(weak, nonatomic) UIImageView *flagImage;
-@property(copy, nonatomic) NSString *numberFormat; // @"long" for 10 character number, @"short" for 8/9 character
-// this is some key, cause I didn't imagine how to use Enum in Objective-C
+@property(copy, nonatomic) NSString *numberFormat;
+@property(readwrite, nonatomic) NSInteger numberLength;
+// @"long" for 10 character number, @"short" for 8/9 character
+// this is some key, cause I didn't imagine how to use Enum in Objective-C yet
+//-(instancetype)initWithCountry:(NSString *)formatType numberLength:(NSInteger)lenght;
 
 @end
 
 @implementation ViewController
 
+//-(instancetype)initWithCountry:(NSString *)formatType numberLength:(NSInteger)length {
+//    self = [super init];
+//    if (self) {
+//        _numberFormat = formatType;
+//        _numberLength = length;
+//    }
+//    return self;
+//}
+
+//-(void)setCountrySettings:(NSString *)formatType with:(NSInteger)length {
+//    if (_numberFormat != formatType) {
+//        [_numberFormat release];
+//        _numberFormat = [formatType copy];
+//    }
+//    _numberLength = length;
+//}
+
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self setupView];
+    [self setCountrySettings:@(0) imageName:@""]; // set default settings
+}
+
+-(void)setCountrySettings:(NSNumber *)formatType imageName:(NSString *)name {
+    if ([name.lowercaseString isEqualToString:@""]) {
+        self.flagImage.image = nil;
+    } else {
+        self.flagImage.image = [UIImage imageNamed:name];
+    }
+    
+    switch ([formatType intValue]) {
+        case 1:
+            NSLog(@"ru/kz");
+            self.numberLength = 11;
+            self.numberFormat = @"ru/kz";
+            break;
+        case 2:
+            NSLog(@"md/am");
+            self.numberLength = 11;
+            self.numberFormat = @"md/am";
+            break;
+        default:
+            NSLog(@"euro / default");
+            self.numberLength = 12;
+            break;
+    }
 }
 
 #pragma mark - setup UI
@@ -48,7 +94,7 @@
 -(void)setupTextFieldAppearance {
     CGRect textFieldSize = CGRectMake(20, 40, self.view.frame.size.width - 40, 60);
     self.phoneNumberTextField = [[[UITextField alloc] initWithFrame:textFieldSize] autorelease];
-    self.phoneNumberTextField.font = [UIFont boldSystemFontOfSize:21];
+    self.phoneNumberTextField.font = [UIFont boldSystemFontOfSize:20];
     self.phoneNumberTextField.textColor = UIColor.blackColor;
     self.phoneNumberTextField.placeholder = @"Enter the phone number";
     self.phoneNumberTextField.backgroundColor = UIColor.whiteColor;
@@ -75,58 +121,72 @@
 
 #pragma mark - define the code of the country and setup country flag
 -(void)defineCountryCode:(NSString *)phoneNumber {
-    NSMutableString *prefix = [[NSMutableString new] autorelease];
-    if (phoneNumber.length >= 3) {
-        prefix = [NSMutableString stringWithFormat:@"%@", [phoneNumber substringWithRange:NSMakeRange(0, 3)]];
-//        prefix = [[phoneNumber substringWithRange:NSMakeRange(0, 3)] mutableCopy];
+    NSString *decimalNumber = [self getDecimalStringFromPhoneNumber:phoneNumber];
+    NSString *prefix = [NSString stringWithFormat:@"%@", decimalNumber];
+    
+    if (decimalNumber.length >= 3) {
+        prefix = [NSMutableString stringWithFormat:@"%@", [decimalNumber substringWithRange:NSMakeRange(0, 3)]];
+        //        prefix = [[phoneNumber substringWithRange:NSMakeRange(0, 3)] mutableCopy];
     }
     
     switch ([prefix intValue]) {
         case 998:
-            self.flagImage.image = [UIImage imageNamed:@"flag_UZ"];
+            [self setCountrySettings:@(3) imageName:@"flag_UZ"];
+//            self.flagImage.image = [UIImage imageNamed:@"flag_UZ"];
             break;
         case 996:
-            self.flagImage.image = [UIImage imageNamed:@"flag_KG"];
+            [self setCountrySettings:@(3) imageName:@"flag_KG"];
+//            self.flagImage.image = [UIImage imageNamed:@"flag_KG"];
             break;
         case 994:
-            self.flagImage.image = [UIImage imageNamed:@"flag_AZ"];
+//            self.flagImage.image = [UIImage imageNamed:@"flag_AZ"];
+            [self setCountrySettings:@(3) imageName:@"flag_AZ"];
             break;
         case 993:
-            self.flagImage.image = [UIImage imageNamed:@"flag_TM"];
+//            self.flagImage.image = [UIImage imageNamed:@"flag_TM"];
+            [self setCountrySettings:@(3) imageName:@"flag_TM"];
             break;
         case 992:
-            self.flagImage.image = [UIImage imageNamed:@"flag_TJ"];
+//            self.flagImage.image = [UIImage imageNamed:@"flag_TJ"];
+            [self setCountrySettings:@(3) imageName:@"flag_TJ"];
             break;
         case 380:
-            self.flagImage.image = [UIImage imageNamed:@"flag_UA"];
+//            self.flagImage.image = [UIImage imageNamed:@"flag_UA"];
+            [self setCountrySettings:@(3) imageName:@"flag_UA"];
             break;
         case 375:
-            self.flagImage.image = [UIImage imageNamed:@"flag_BY"];
+//            self.flagImage.image = [UIImage imageNamed:@"flag_BY"];
+            [self setCountrySettings:@(3) imageName:@"flag_BY"];
             break;
         case 374:
-            self.flagImage.image = [UIImage imageNamed:@"flag_AM"];
+            [self setCountrySettings:@(2) imageName:@"flag_AM"];
+//            self.flagImage.image = [UIImage imageNamed:@"flag_AM"];
             break;
         case 373:
-            self.flagImage.image = [UIImage imageNamed:@"flag_MD"];
+//            self.flagImage.image = [UIImage imageNamed:@"flag_MD"];
+            [self setCountrySettings:@(2) imageName:@"flag_MD"];
             break;
         default:
-            if (phoneNumber.length >= 2) {
-                prefix = [NSMutableString stringWithFormat:@"%@", [phoneNumber substringWithRange:NSMakeRange(0, 2)]];
+            if (decimalNumber.length >= 2) {
+                prefix = [NSMutableString stringWithFormat:@"%@", [decimalNumber substringWithRange:NSMakeRange(0, 2)]];
             }
             switch ([prefix intValue]) {
                 case 77:
-                    self.flagImage.image = [UIImage imageNamed:@"flag_KZ"];
+                    [self setCountrySettings:@(1) imageName:@"flag_KZ"];
+//                    self.flagImage.image = [UIImage imageNamed:@"flag_KZ"];
                     break;
                 default:
-                    if (phoneNumber.length >= 1) {
-                        prefix = [NSMutableString stringWithFormat:@"%@", [phoneNumber substringWithRange:NSMakeRange(0, 1)]];
+                    if (decimalNumber.length >= 1) {
+                        prefix = [NSMutableString stringWithFormat:@"%@", [decimalNumber substringWithRange:NSMakeRange(0, 1)]];
                     }
                     switch ([prefix intValue]) {
                         case 7:
-                            self.flagImage.image = [UIImage imageNamed:@"flag_RU"];
+                            [self setCountrySettings:@(1) imageName:@"flag_RU"];
+//                            self.flagImage.image = [UIImage imageNamed:@"flag_RU"];
                             break;
                         default:
-                            self.flagImage.image = nil;
+//                            self.flagImage.image = nil;
+                            [self setCountrySettings:@(0) imageName:@""];
                             break;
                     }
                     break;
@@ -145,13 +205,6 @@
     return NO;
 }
 
-//-(void)textFieldDidEndEditing:(UITextField *)textField {
-//    if ([textField isFirstResponder]) {
-//        [textField resignFirstResponder];
-//         NSLog(@"event log -> %s", "textFieldDidEndEditing");
-//    }
-//}
-
 // hide keyboard and return value on touching outside
 -(void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
     UITouch *touch = [touches anyObject];
@@ -163,7 +216,6 @@
         [self.view endEditing:YES];
     }
 }
-
 
 -(void)textFieldDidChange:(UITextField *)textField {
     if ([self.phoneNumberTextField.text hasPrefix:@"+"]) {
@@ -189,52 +241,110 @@
         }
         
         // manage user's input data
-        // TODO: нужно считать количество цифр без символов, пробелов и скобок - должно быть 375298707234 <= 12 всегда +
-        // 1. отсекаем лишнее содержание +
-        // 2. считаем количество цифр и проверяем условие +
-        NSString *clearNumber = [self getDecimalStringFromPhoneNumber:textField.text];
-        if (clearNumber.length < 12) {
+        NSInteger countryLimit = self.numberLength;
+        NSString *decimalNumber = [self getDecimalStringFromPhoneNumber:textField.text];
+        if (decimalNumber.length < (int)countryLimit) {
+            if (strcmp([string cStringUsingEncoding:NSUTF8StringEncoding], "\b") == -8) {
+                // determine that the delete button was pressed
+                NSLog(@"backspace pressed");
+                return YES;
+            }
+            
             if ([string rangeOfCharacterFromSet:charSet.invertedSet].location != NSNotFound &&
                 [string rangeOfCharacterFromSet:specialSet].location) {
                 NSLog(@"wrong symbols");
                 return NO;
             } else
                 // check - if user will try to enter "+" in the middle of a phone number - block this
+                // TODO: - permit to use delete button
                 if ([string rangeOfCharacterFromSet:charSet.invertedSet].location != NSNotFound && range.location != 0) {
                     NSLog(@"No symbols, only decimal");
                     return NO;
                 }
             
             // add phone number formating - begin
-            // TODO: - добавляем скобки
-            // 1. remove country code and get number lenght
-            // 2. choose the option: 10, 9, 8
-            // 3. add "(", ")", " ", "-" on correct positions according to the mask
-            // +X (XXX) - only this part
-            // russian - +7 (123) 456 78 90
-            NSMutableString *formattedNumber = [[clearNumber mutableCopy] autorelease];
-            [formattedNumber insertString:@" (" atIndex:1]; // вставляем на позицию 1
-            [formattedNumber appendString:@") "]; // добавляем к строке в конце
-            NSLog(@"formatted number: %@", formattedNumber);
-            textField.text = formattedNumber;
-            
+            if ([self.numberFormat.lowercaseString isEqualToString:@"ru/kz"]) {
+                // only ru/kz - +7 (123) 456 78 90
+                NSMutableString *tempNumber = [NSMutableString stringWithFormat:@"+%@", decimalNumber];
+                if (decimalNumber.length == 4) {
+                    [tempNumber insertString:@" (" atIndex:2];
+                    [tempNumber insertString:@") " atIndex:7];
+                    textField.text = tempNumber;
+                } else
+                    if (decimalNumber.length == 8) {
+                        [tempNumber insertString:@" (" atIndex:2];
+                        [tempNumber insertString:@") " atIndex:7];
+                        [tempNumber insertString:@" " atIndex:12];
+                        textField.text = tempNumber;
+                    } else
+                        if (decimalNumber.length > 9) {
+                            [tempNumber insertString:@" (" atIndex:2];
+                            [tempNumber insertString:@") " atIndex:7];
+                            [tempNumber insertString:@" " atIndex:12];
+                            [tempNumber insertString:@" " atIndex:15];
+                            textField.text = tempNumber;
+                        }
+            } else
+                if ([self.numberFormat.lowercaseString isEqualToString:@"md/am"]) {
+                    // only md/am +373 (98) 987-654
+                    NSMutableString *tempNumber = [NSMutableString stringWithFormat:@"+%@", decimalNumber];
+                    if (decimalNumber.length == 5) {
+                        [tempNumber insertString:@" (" atIndex:4];
+                        [tempNumber insertString:@") " atIndex:8];
+                        textField.text = tempNumber;
+                    } else
+                        if (decimalNumber.length > 8) {
+                            [tempNumber insertString:@" (" atIndex:4];
+                            [tempNumber insertString:@") " atIndex:8];
+                            [tempNumber insertString:@"-" atIndex:13];
+                            textField.text = tempNumber;
+                        }
+                } else {
+                    // only euro - +375 (29) 870-72-34
+                    NSMutableString *tempNumber = [NSMutableString stringWithFormat:@"+%@", decimalNumber];
+                    if (decimalNumber.length == 5) {
+                        [tempNumber insertString:@" (" atIndex:4];
+                        [tempNumber insertString:@") " atIndex:8];
+                        textField.text = tempNumber;
+                    } else
+                        if (decimalNumber.length == 8) {
+                            [tempNumber insertString:@" (" atIndex:4];
+                            [tempNumber insertString:@") " atIndex:8];
+                            [tempNumber insertString:@"-" atIndex:13];
+                            textField.text = tempNumber;
+                        } else
+                            if (decimalNumber.length > 10) {
+                                [tempNumber insertString:@" (" atIndex:4];
+                                [tempNumber insertString:@") " atIndex:8];
+                                [tempNumber insertString:@"-" atIndex:13];
+                                [tempNumber insertString:@"-" atIndex:16];
+                                textField.text = tempNumber;
+                            }
+                }
             // add phone number formating - end
             return YES;
         } else {
-            NSLog(@"limit!");
+            if (strcmp([string cStringUsingEncoding:NSUTF8StringEncoding], "\b") == -8) {
+                // determine that the delete button was pressed
+                return YES;
+            }
+            NSLog(@"Limit! This number already containts %lu digits!", (unsigned long)decimalNumber.length);
             return NO;
         }
     }
     return YES;
 }
 
-
-// TODO: - works incorrect!!!
 -(NSString *)getDecimalStringFromPhoneNumber:(NSString *)input {
-    NSCharacterSet *set = [NSCharacterSet decimalDigitCharacterSet];
-    NSString *string = [NSString stringWithFormat:@"%@", [input stringByTrimmingCharactersInSet:set.invertedSet]];
-    NSLog(@"str -> %@", string);
-    return string;
+    //    NSString *decimalNumber = [NSString stringWithFormat:@"%@", @"+375(29)-870-72-34"];
+    NSString *decimalNumber = [NSString stringWithFormat:@"%@", input];
+    decimalNumber = [decimalNumber stringByReplacingOccurrencesOfString:@"+" withString:@""];
+    decimalNumber = [decimalNumber stringByReplacingOccurrencesOfString:@"-" withString:@""];
+    decimalNumber = [decimalNumber stringByReplacingOccurrencesOfString:@")" withString:@""];
+    decimalNumber = [decimalNumber stringByReplacingOccurrencesOfString:@"(" withString:@""];
+    decimalNumber = [decimalNumber stringByReplacingOccurrencesOfString:@" " withString:@""];
+    NSLog(@"decimalNumber -> %@", decimalNumber);
+    return decimalNumber;
 }
 
 - (void)dealloc
@@ -246,6 +356,7 @@
     [self phoneNumberTextField];
     [self flagImage];
     [self numberFormat];
+    [self numberLength];
     [super dealloc];
 }
 
